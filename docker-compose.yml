@@ -6,14 +6,18 @@ services:
     image: hyperframes-mcp:latest
     restart: unless-stopped
     environment:
-      # Leave empty to disable auth; set a token to require
-      # "Authorization: Bearer <token>" on every HTTP call.
+      # Set a token to require "Authorization: Bearer <token>" on every call
+      # (except the public /health). Leave empty to keep the endpoint open.
       MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-}
       MCP_TRANSPORT: http
       HF_WORKSPACE: /data/projects
+      HF_JOBS_DIR: /data/jobs
+      # Renders are CPU-bound: keep concurrency at 1 unless you size the box up.
+      HF_JOB_CONCURRENCY: ${HF_JOB_CONCURRENCY:-1}
       PORT: "8080"
     volumes:
       - hf-mcp-projects:/data/projects
+      - hf-mcp-jobs:/data/jobs
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
@@ -35,6 +39,7 @@ services:
 
 volumes:
   hf-mcp-projects:
+  hf-mcp-jobs:
 
 networks:
   dokploy-network:

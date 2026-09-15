@@ -70,10 +70,11 @@ COPY package.json ./
 RUN bun install
 COPY src ./src
 COPY entrypoint.sh /usr/local/bin/entrypoint
-RUN chmod +x /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint && mkdir -p /data/jobs /data/projects
 
 ENV HF_ROOT=/app/hf \
     HF_WORKSPACE=/data/projects \
+    HF_JOBS_DIR=/data/jobs \
     MCP_TRANSPORT=http \
     PORT=8080
 

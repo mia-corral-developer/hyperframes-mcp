@@ -4,6 +4,7 @@ set -e
 
 WORKSPACE="${HF_WORKSPACE:-/data/projects}"
 mkdir -p "$WORKSPACE"
+mkdir -p "${HF_JOBS_DIR:-/data/jobs}"
 
 if [ -z "$(ls -A "$WORKSPACE" 2>/dev/null)" ]; then
   echo "[entrypoint] seeding sample projects into $WORKSPACE"

@@ -1,6 +1,6 @@
 {
   "name": "hyperframes-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Self-hosted MCP server that wraps the HyperFrames CLI (render, snapshot, lint, compositions, init) for agents.",
