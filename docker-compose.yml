@@ -1,0 +1,41 @@
+services:
+  hyperframes-mcp:
+    build:
+      context: https://github.com/mia-corral-developer/hyperframes-mcp.git#main
+      dockerfile: Dockerfile
+    image: hyperframes-mcp:latest
+    restart: unless-stopped
+    environment:
+      # Leave empty to disable auth; set a token to require
+      # "Authorization: Bearer <token>" on every HTTP call.
+      MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-}
+      MCP_TRANSPORT: http
+      HF_WORKSPACE: /data/projects
+      PORT: "8080"
+    volumes:
+      - hf-mcp-projects:/data/projects
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=dokploy-network
+
+      - traefik.http.routers.hf-mcp-web.rule=Host(`hyperframes-mcp.lab.whitelabel.lat`)
+      - traefik.http.routers.hf-mcp-web.entrypoints=web
+      - traefik.http.routers.hf-mcp-web.service=hf-mcp-web
+      - traefik.http.routers.hf-mcp-web.middlewares=redirect-to-https@file
+
+      - traefik.http.routers.hf-mcp-websecure.rule=Host(`hyperframes-mcp.lab.whitelabel.lat`)
+      - traefik.http.routers.hf-mcp-websecure.entrypoints=websecure
+      - traefik.http.routers.hf-mcp-websecure.service=hf-mcp-websecure
+      - traefik.http.routers.hf-mcp-websecure.tls.certresolver=letsencrypt
+
+      - traefik.http.services.hf-mcp-web.loadbalancer.server.port=8080
+      - traefik.http.services.hf-mcp-websecure.loadbalancer.server.port=8080
+    networks:
+      - dokploy-network
+
+volumes:
+  hf-mcp-projects:
+
+networks:
+  dokploy-network:
+    external: true
