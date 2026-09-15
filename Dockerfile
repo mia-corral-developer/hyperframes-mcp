@@ -55,6 +55,7 @@ RUN bun run --cwd packages/parsers build \
     && bun run --cwd packages/engine build \
     && (cd packages/producer && bunx tsx scripts/generate-font-data.ts) \
     && bun run --cwd packages/producer build \
+    && bun run --cwd packages/studio build \
     && bun run --cwd packages/cli build
 
 # ── Sample projects seeded into the workspace on first boot ──────────────────
