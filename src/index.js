@@ -482,7 +482,13 @@ async function startHttp() {
       const id = url.pathname.slice("/jobs/".length);
       const job = queue.get(id);
       res.writeHead(job ? 200 : 404, { "content-type": "application/json" });
-      return res.end(JSON.stringify(job || { error: "not found", job_id: id }, null, 2));
+      return res.end(
+        JSON.stringify(
+          job ? { ...job, files: jobFiles(job) } : { error: "not found", job_id: id },
+          null,
+          2
+        )
+      );
     }
     if (req.method === "POST" && /^\/jobs\/[^/]+\/cancel$/.test(url.pathname)) {
       const id = url.pathname.slice("/jobs/".length, -"/cancel".length);
