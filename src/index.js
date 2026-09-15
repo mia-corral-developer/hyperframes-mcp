@@ -333,6 +333,43 @@ function buildServer() {
   );
 
   server.registerTool(
+    "write_project_file",
+    {
+      description:
+        "Escribe (o crea) un archivo dentro de un proyecto del workspace: HTML, CSS, SVG, JSON… " +
+        "Crea los directorios necesarios. Para binarios (PNG/JPG/MP4) usa encoding=base64. " +
+        "Permite crear un proyecto nuevo desde cero escribiendo su index.html.",
+      inputSchema: {
+        project: z.string().describe("Nombre del proyecto (se crea si no existe)"),
+        path: z
+          .string()
+          .describe("Ruta relativa dentro del proyecto, ej 'index.html' o 'assets/z.png'"),
+        content: z.string().describe("Contenido (texto UTF-8, o base64 si encoding=base64)"),
+        encoding: z.enum(["utf8", "base64"]).optional().describe("Def utf8"),
+      },
+    },
+    async ({ project, path: relPath, content, encoding }) => {
+      const dir = path.resolve(WORKSPACE, String(project));
+      if (dir !== WORKSPACE && !dir.startsWith(WORKSPACE + path.sep)) {
+        return fail(`proyecto fuera del workspace: ${project}`);
+      }
+      const target = path.resolve(dir, String(relPath));
+      if (target !== dir && !target.startsWith(dir + path.sep)) {
+        return fail(`ruta fuera del proyecto: ${relPath}`);
+      }
+      const data =
+        encoding === "base64" ? Buffer.from(content, "base64") : Buffer.from(content, "utf8");
+      try {
+        await fs.mkdir(path.dirname(target), { recursive: true });
+        await fs.writeFile(target, data);
+        return ok(`escrito ${rel(target)} (${data.length} bytes)`);
+      } catch (e) {
+        return fail(`no se pudo escribir ${relPath}: ${e.message}`);
+      }
+    }
+  );
+
+  server.registerTool(
     "wait_job",
     {
       description: "Bloquea hasta que el job termine (o se agote el timeout). Útil para agentes sin polling.",
@@ -430,6 +467,7 @@ async function startHttp() {
               "render_video",
               "snapshot_frames",
               "create_project",
+              "write_project_file",
               "get_job",
               "list_jobs",
               "wait_job",
